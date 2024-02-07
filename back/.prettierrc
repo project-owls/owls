@@ -1,0 +1,9 @@
+{
+  "tabWidth": 2,
+  "semi": true,
+  "arrowParents": "always",
+  "endOfLine": "lf",
+  "embeddedLanguageFormatting": "auto",
+  "bracketSpacing": true,
+  "singleQuote": true
+}

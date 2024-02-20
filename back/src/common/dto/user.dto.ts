@@ -28,7 +28,7 @@ export class UserDto {
     required: true
   })
   @IsString()
-  @MaxLength(15, {
+  @MaxLength(20, {
     message: '닉네임은 최대 $constraint1자 입니다.'
   })
   nickname: string;

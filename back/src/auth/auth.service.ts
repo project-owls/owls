@@ -9,15 +9,24 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async OAuthLogin({ socialLoginData }) {
-    const { email } = socialLoginData;
+  async OAuthLogin({ socialLoginDto }) {
+    let { email, nickname } = socialLoginDto;
 
     let user = await this.userService.findByEmail( email );
 
-    if(!user)
+    if(!user) {
+      const foundUser = await this.userService.findByNickname(nickname);
+
+      if (foundUser !== null) {
+        nickname = nickname + Math.random().toString(16).substring(2, 8);
+      }
+
+      socialLoginDto = { email, nickname }
+      
       user = await this.userService.create(
-        socialLoginData,  
+        socialLoginDto,
       );
+    }
 
     const accessToken = this.generateAccessToken({ userId: user.id });
     const refreshToken = this.generateRefreshToken({ userId: user.id });

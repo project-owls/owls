@@ -9,6 +9,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       clientID: process.env.KAKAO_CLIENT_ID,
       clientSecret: '',
       callbackURL: process.env.KAKAO_CALLBACK_URL,
+      scope: ["account_email", "profile_nickname"],
     });
   }
 

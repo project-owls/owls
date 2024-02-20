@@ -1,10 +1,10 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from '../common/decorators/user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
-import { UserDto } from 'src/common/dto/user.dto';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SocialLoginDto } from 'src/user/dto/socialLogin.dto';
 
 @Controller('auth')
 @ApiTags('AUTH')
@@ -24,19 +24,45 @@ export class AuthController {
   @UseGuards(AuthGuard('kakao'))
   @HttpCode(HttpStatus.OK)
   async kakaoLogin(
-    @User() socialLoginData: UserDto,
+    @User() socialLoginDto: SocialLoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
 
     const { accessToken, refreshToken } = await this.authService.OAuthLogin({
-      socialLoginData,
+      socialLoginDto,
     });
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
     res.cookie('accessToken', accessToken, { httpOnly: true });
 
-    return res.redirect('http://localhost:3000')
+    return res.redirect('/')
   }
+
+  @Get('google')
+  @ApiOperation({ 
+    summary: '구글 로그인',
+    description: '구글 API를 이용한 로그인/회원가입'
+  })
+  @ApiOkResponse({
+    description: '성공적으로 구글 로그인을 했으며 브라우저 쿠키에 access/refresh Token이 저장되었습니다.',
+  })
+  @UseGuards(AuthGuard('google'))
+  @HttpCode(HttpStatus.OK)
+  async googleLogin(
+    @User() socialLoginDto: SocialLoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+
+    const { accessToken, refreshToken } = await this.authService.OAuthLogin({
+      socialLoginDto,
+    });
+
+    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    res.cookie('accessToken', accessToken, { httpOnly: true });
+
+    return res.redirect('/')
+  }
+
 
   @Get('refresh')
   @ApiBearerAuth('JWT')
@@ -73,6 +99,6 @@ export class AuthController {
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
 
-    return res.redirect('http://localhost:3000')
+    return res.redirect('/')
   }
 }

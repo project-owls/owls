@@ -39,7 +39,7 @@ export class UserDto {
 
   @ApiProperty({
     example: '2024-02-19 13:56:13.248',
-    description: '생성일'
+    description: '수정일'
   })
   @IsDate()
   updatedAt: Date;

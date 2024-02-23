@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { user } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { UserDto } from '../common/dto/user.dto';
 import { SocialLoginDto } from './dto/socialLogin.dto';
@@ -10,13 +10,13 @@ export class UserService {
     private prisma: PrismaService,
   ) {}
 
-  async create(socialLoginDto: SocialLoginDto): Promise<User> {
+  async create(socialLoginDto: SocialLoginDto): Promise<user> {
     return await this.prisma.user.create({
       data: socialLoginDto,
     });
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<user> {
     return this.prisma.user.findUnique({
       where: {
         id,
@@ -24,7 +24,7 @@ export class UserService {
     })
   }
 
-  async findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<user> {
     return this.prisma.user.findUnique({
       where: {
         email,
@@ -32,7 +32,7 @@ export class UserService {
     })
   }
 
-  async findByNickname(nickname: string): Promise<User> {
+  async findByNickname(nickname: string): Promise<user> {
     return this.prisma.user.findUnique({
       where: {
         nickname,
@@ -40,7 +40,7 @@ export class UserService {
     })
   }
 
-  async update(id: string, updateUserData: UserDto): Promise<User> {
+  async update(id: string, updateUserData: UserDto): Promise<user> {
     return this.prisma.user.update({
       where: {
         id,

@@ -7,7 +7,7 @@ import { ResponseTransformInterceptor } from 'src/common/interceptors/response-t
 import { UserDto } from 'src/common/dto/user.dto';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-@Controller('user')
+@Controller('users')
 @ApiTags('USER')
 @UseInterceptors(ResponseTransformInterceptor)
 export class UserController {

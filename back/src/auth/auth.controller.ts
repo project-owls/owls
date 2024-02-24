@@ -4,7 +4,7 @@ import { User } from '../common/decorators/user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SocialLoginDto } from 'src/user/dto/socialLogin.dto';
+import { SocialLoginDto } from 'src/user/dto/social-login.dto';
 
 @Controller('auth')
 @ApiTags('AUTH')

@@ -16,7 +16,7 @@ export class UserService {
     });
   }
 
-  async findById(id: string): Promise<user> {
+  async findById(id: string): Promise<user | null> {
     return this.prisma.user.findUnique({
       where: {
         id,
@@ -24,7 +24,7 @@ export class UserService {
     })
   }
 
-  async findByEmail(email: string): Promise<user> {
+  async findByEmail(email: string): Promise<user | null> {
     return this.prisma.user.findUnique({
       where: {
         email,
@@ -32,7 +32,7 @@ export class UserService {
     })
   }
 
-  async findByNickname(nickname: string): Promise<user> {
+  async findByNickname(nickname: string): Promise<user | null> {
     return this.prisma.user.findUnique({
       where: {
         nickname,

@@ -89,10 +89,10 @@ export class BoardService {
       })
     ])
 
-    return { category: CategoryBoards[2].name, allBoards: CategoryBoards[0], boardTotalCount: CategoryBoards[1], boardTotalPage: Math.ceil(CategoryBoards[1] / perPage) }
+    return { category: CategoryBoards[2]?.name, allBoards: CategoryBoards[0], boardTotalCount: CategoryBoards[1], boardTotalPage: Math.ceil(CategoryBoards[1] / perPage) }
   }
 
-  async getSpecificBoard(boardId: number): Promise<Partial<BoardDto>> {
+  async getSpecificBoard(boardId: number): Promise<Partial<BoardDto> | null> {
     return await this.prisma.board.findUnique({
       where: {
         id: boardId,
@@ -119,7 +119,7 @@ export class BoardService {
     })
   }
 
-  async getBoardCreateUserId(boardId: number): Promise<BoardDto> {
+  async getBoardCreateUserId(boardId: number): Promise<BoardDto | null> {
     return await this.prisma.board.findUnique({
       where: {
         id: boardId
@@ -144,7 +144,7 @@ export class BoardService {
     })
   }
 
-  async searchLike(boardId: number, userId: string): Promise<boardLike> {
+  async searchLike(boardId: number, userId: string): Promise<boardLike | null> {
     return await this.prisma.boardLike.findUnique({
       where: {
         userId_boardId: {
@@ -229,9 +229,14 @@ export class BoardService {
           }
         }
       },
-      orderBy: {
-        likeCount: 'desc',
-      },
+      orderBy: [
+        {
+          likeCount: 'desc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ],
       take: 3
     })
   }

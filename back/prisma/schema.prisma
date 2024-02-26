@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id                String        @default(uuid())          @id
+  email             String        @unique()
+  nickname          String        @unique()
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @default(now())
+
+  board             board[]
+  boardLike         boardLike[]
+}
+
+model board {
+  id                Int           @default(autoincrement())          @id
+  title             String        
+  content           String        
+  published         Boolean       @default(true)
+  likeCount         Int           @default(0)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  userId            String
+  user              user          @relation(fields: [userId], references: [id])
+  categoryId        Int
+  boardCategory     boardCategory @relation(fields: [categoryId], references: [id])
+
+  boardLike         boardLike[]
+}
+
+model boardLike {
+  userId            String
+  boardId           Int
+  user              user          @relation(fields: [userId], references: [id])
+  board             board         @relation(fields: [boardId], references: [id])
+
+  @@id([userId, boardId])
+}
+
+model boardCategory {
+  id                Int           @default(autoincrement())          @id
+  name              String
+
+  board             board[]
+}

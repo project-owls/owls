@@ -4,7 +4,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { BoardDto } from 'src/common/dto/board.dto';
 import { AllBoardsDto } from './dto/all-boards.dto';
-import { boardLike } from '@prisma/client';
+import { board, boardLike } from '@prisma/client';
 
 @Injectable()
 export class BoardService {
@@ -30,8 +30,8 @@ export class BoardService {
   }
 
   async getSpecificCategoryBoards(page: number, categoryId: number, sort: string) {
-    let whereField: { [key: string]: number | { [key: string]: number } };
-    let orderByField: { [key: string]: 'desc' | 'asc'}
+    let whereField;
+    let orderByField;
 
     const getBoardCategoryParent = await this.getBoardCategoryParent(categoryId);
 
@@ -202,7 +202,7 @@ export class BoardService {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7).toString().slice(0, 10);
     
-    let whereField: { [key: string]: number | { [key: string]: number | Date } };
+    let whereField;
 
     const getBoardCategoryParent = await this.getBoardCategoryParent(categoryId);
 
@@ -260,4 +260,76 @@ export class BoardService {
       }
     })
   }
+
+  async searchBoards(categoryId: number, search: string, page: number, sort: string): Promise<AllBoardsDto> {
+      const searchList = search.split(' ');
+    
+      const modifiedSearch = searchList.map((search) => {
+        return `*${search}*`;
+      });
+
+      console.log(modifiedSearch)
+      const fullTextQuery = modifiedSearch.join(' ');
+
+    let whereField;
+    let orderByField;
+
+    const getBoardCategoryParent = await this.getBoardCategoryParent(categoryId);
+
+    if (getBoardCategoryParent.length === 0) {
+      whereField = { categoryId, title: { search: fullTextQuery }, content: { search: fullTextQuery } }
+    } else {
+      whereField =  { boardCategory: { parentCategory: categoryId }, title: { search: fullTextQuery }, content: { search: fullTextQuery } }
+    }
+
+    if (sort === "views") {
+      orderByField = { views: 'desc' }
+    } else {
+      orderByField = { _relevance: { fields: ['title', 'content'], search: fullTextQuery, sort: 'desc' } }
+    }
+
+    const searchBoards = await this.prisma.board.findMany({
+      skip: (page - 1) * 10,
+      take: 10,
+      where: whereField,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        views: true,
+        likeCount: true,
+        createdAt: true,
+        updatedAt: true,
+        boardCategory: {
+          select: {
+            name: true,
+          }
+        },
+        user: {
+          select: {
+            nickname: true,
+          }
+        }
+      },
+      //orderBy: orderByField
+    })
+
+    const getCategoryName = await this.prisma.boardCategory.findUnique({
+      where: {
+        id: categoryId,
+      },
+      select: {
+        name: true,
+      }
+    })
+
+    const boardTotalCount = await this.prisma.board.count({
+      where: whereField,
+    })
+
+    return { category: getCategoryName?.name, boards: searchBoards, boardTotalCount, boardTotalPage: Math.ceil(boardTotalCount / 10) }
+  }
 }
+
+

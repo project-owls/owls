@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Query, ParseIntPipe, Body, Post, UseGuards, Param, Put, UnauthorizedException, Delete, NotFoundException, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Query, ParseIntPipe, Body, Post, UseGuards, Param, Put, UnauthorizedException, Delete, NotFoundException, UseInterceptors, DefaultValuePipe } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseMsg } from 'src/common/decorators/response-message.decorator';
@@ -57,15 +57,16 @@ export class BoardController {
   @ResponseMsg('해당 카테고리의 모든 게시글을 성공적으로 조회하였습니다.')
   @Get('views')
   async getSpecificCategoryBoard(
-    @Query('category_id', ParseIntPipe) categoryId: number,
-    @Query('page', ParseIntPipe) page: number,
+    @Query('category_id', new DefaultValuePipe(1), ParseIntPipe) categoryId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('sort') sort: string,
   ) {
     const getSpecificCategoryBoards = await this.boardService.getSpecificCategoryBoards(page, categoryId, sort);
 
-    // if (getSpecificCategoryBoards.boardTotalCount === 0) {
-    //   throw new NotFoundException('해당 카테고리의 게시글이 없어요')
-    // }
+    if (getSpecificCategoryBoards.boardTotalCount === 0) {
+      throw new NotFoundException('해당 카테고리의 게시글이 없어요')
+    }
+
     return {
       data: getSpecificCategoryBoards,
     }
@@ -194,10 +195,37 @@ export class BoardController {
   @ResponseMsg('해당 카테고리 인기글을 성공적으로 조회하였습니다.')
   @Get('views/popular/:category_id')
   async getPopularBoards(
-    @Param('category_id', ParseIntPipe) categoryId: number,
+    @Param('category_id', new DefaultValuePipe(1), ParseIntPipe) categoryId: number,
   ) {
     const getSpecificCategoryBoardsSinceAWeekAgo = await this.boardService.getSpecificCategoryPopularBoardsSinceAWeekAgo(categoryId);
 
     return { data: getSpecificCategoryBoardsSinceAWeekAgo }
+  }
+
+  @ApiOperation({ 
+    summary: '게시글 검색',
+    description: '주어진 검색어로 게시글을 검색합니다.'
+  })
+  @ApiOkResponse({
+    description: '게시글을 성공적으로 검색하였습니다.',
+  })
+  @HttpCode(HttpStatus.OK)
+  @ResponseMsg('게시글을 성공적으로 검색하였습니다.')
+  @Get('views/search')
+  async searchBoards(
+    @Query('category_id', new DefaultValuePipe(1), ParseIntPipe) categoryId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('sort') sort: string,
+    @Query('search') search: string,
+  ) {
+    const searchBoards = await this.boardService.searchBoards(categoryId, search, page, sort);
+
+    if (searchBoards.boardTotalCount === 0) {
+      throw new NotFoundException(`${search}와 일치하는 검색결과가 없어요`)
+    }
+
+    return {
+      data: searchBoards,
+    }
   }
 }

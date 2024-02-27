@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -36,6 +37,10 @@ model board {
   boardCategory     boardCategory     @relation(fields: [categoryId], references: [id])
 
   boardLike         boardLike[]
+
+  @@fulltext([title])
+  @@fulltext([content])
+  @@fulltext([content, title])
 }
 
 model boardLike {

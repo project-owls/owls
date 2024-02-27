@@ -35,6 +35,13 @@ export class BoardDto {
 
   @ApiProperty({
     example: '100',
+    description: '게시글 조회 수',
+  })
+  @IsNumber()
+  views: number;
+
+  @ApiProperty({
+    example: '100',
     description: '게시글 좋아요 수',
   })
   @IsNumber()

@@ -47,28 +47,7 @@ export class BoardController {
 
 
   @ApiOperation({ 
-    summary: '모든 게시글 조회',
-    description: '모든 게시글을 조회합니다.'
-  })
-  @ApiOkResponse({
-    description: '모든 게시글을 성공적으로 조회하였습니다.',
-  })
-  @HttpCode(HttpStatus.OK)
-  @ResponseMsg('모든 게시글을 성공적으로 조회하였습니다.')
-  @Get('views')
-  async getAllBoard(
-    @Query('perPage', ParseIntPipe) perPage: number,
-    @Query('page', ParseIntPipe) page: number,
-  ) {
-    const getAllBoards = await this.boardService.getAllBoards(perPage, page);
-
-    return {
-      data: getAllBoards,
-    }
-  }
-
-  @ApiOperation({ 
-    summary: '특정 카테고리 게시글 조회',
+    summary: '카테고리 게시글 조회',
     description: '해당 카테고리의 모든 게시글을 조회합니다.'
   })
   @ApiOkResponse({
@@ -76,14 +55,17 @@ export class BoardController {
   })
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('해당 카테고리의 모든 게시글을 성공적으로 조회하였습니다.')
-  @Get('views/:category_id')
+  @Get('views')
   async getSpecificCategoryBoard(
-    @Param('category_id', ParseIntPipe) categoryId: number,
-    @Query('perPage', ParseIntPipe) perPage: number,
+    @Query('category_id', ParseIntPipe) categoryId: number,
     @Query('page', ParseIntPipe) page: number,
+    @Query('sort') sort: string,
   ) {
-    const getSpecificCategoryBoards = await this.boardService.getSpecificCategoryBoards(perPage, page, categoryId);
+    const getSpecificCategoryBoards = await this.boardService.getSpecificCategoryBoards(page, categoryId, sort);
 
+    // if (getSpecificCategoryBoards.boardTotalCount === 0) {
+    //   throw new NotFoundException('해당 카테고리의 게시글이 없어요')
+    // }
     return {
       data: getSpecificCategoryBoards,
     }
@@ -103,9 +85,12 @@ export class BoardController {
     @Param('board_id', ParseIntPipe) boardId: number,
   ) {
     const getSpecificBoard = await this.boardService.getSpecificBoard(boardId);
+
     if (!getSpecificBoard) {
       throw new NotFoundException('해당 게시글은 존재하지 않습니다.')
     }
+
+    await this.boardService.increseBoardviews(boardId);
 
     return {
       data: getSpecificBoard,
@@ -207,7 +192,7 @@ export class BoardController {
   })
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('해당 카테고리 인기글을 성공적으로 조회하였습니다.')
-  @Get('views/:category_id/popular')
+  @Get('views/popular/:category_id')
   async getPopularBoards(
     @Param('category_id', ParseIntPipe) categoryId: number,
   ) {

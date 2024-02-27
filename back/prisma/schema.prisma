@@ -11,28 +11,29 @@ datasource db {
 }
 
 model user {
-  id                String        @default(uuid())          @id
-  email             String        @unique()
-  nickname          String        @unique()
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @default(now())
+  id                String            @default(uuid())                    @id
+  email             String            @unique()
+  nickname          String            @unique()
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @default(now())
 
   board             board[]
   boardLike         boardLike[]
 }
 
 model board {
-  id                Int           @default(autoincrement())          @id
+  id                Int               @default(autoincrement())          @id
   title             String        
   content           String        
-  published         Boolean       @default(true)
-  likeCount         Int           @default(0)
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  published         Boolean           @default(true)
+  views             Int               @default(0)
+  likeCount         Int               @default(0)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
   userId            String
-  user              user          @relation(fields: [userId], references: [id])
+  user              user              @relation(fields: [userId], references: [id])
   categoryId        Int
-  boardCategory     boardCategory @relation(fields: [categoryId], references: [id])
+  boardCategory     boardCategory     @relation(fields: [categoryId], references: [id])
 
   boardLike         boardLike[]
 }
@@ -40,15 +41,18 @@ model board {
 model boardLike {
   userId            String
   boardId           Int
-  user              user          @relation(fields: [userId], references: [id])
-  board             board         @relation(fields: [boardId], references: [id])
+  user              user              @relation(fields: [userId], references: [id])
+  board             board             @relation(fields: [boardId], references: [id])
 
   @@id([userId, boardId])
 }
 
 model boardCategory {
-  id                Int           @default(autoincrement())          @id
+  id                Int               @default(autoincrement())          @id
   name              String
+  parentCategory    Int?
+  innerCategory     boardCategory?    @relation("boardCategory", fields: [parentCategory], references: [id], onDelete: Cascade)
 
   board             board[]
+  boardCategory     boardCategory[]   @relation("boardCategory")
 }

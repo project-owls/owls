@@ -18,78 +18,76 @@ export class BoardService {
     })
   }
 
-  async getAllBoards(perPage: number, page: number): Promise<AllBoardsDto> {
-    const allBoards = await this.prisma.$transaction([
-      this.prisma.board.findMany({
-        skip: (page - 1) * perPage,
-        take: perPage,
-        select: {
-          id: true,
-          title: true,
-          content: true,
-          published: true,
-          likeCount: true,
-          createdAt: true,
-          updatedAt: true,
-          boardCategory: {
-            select: {
-              name: true
-            }
-          },
-          user: {
-            select: {
-              nickname: true,
-            }
-          }
-        },
-        orderBy: { createdAt: 'asc' },
-      }),
-      this.prisma.board.count({})
-    ])
-
-    return { allBoards: allBoards[0], boardTotalCount: allBoards[1], boardTotalPage: Math.ceil(allBoards[1] / perPage) }
+  async getBoardCategoryParent(categoryId: number) {
+    return await this.prisma.boardCategory.findMany({
+      where: {
+        parentCategory: categoryId
+      },
+      select: {
+        id: true,
+      }
+    })
   }
 
-  async getSpecificCategoryBoards(perPage: number, page: number, categoryId: number): Promise<AllBoardsDto> {
-    const CategoryBoards = await this.prisma.$transaction([
-      this.prisma.board.findMany({
-        skip: (page - 1) * perPage,
-        take: perPage,
-        where: {
-          categoryId,
-        },
-        select: {
-          id: true,
-          title: true,
-          content: true,
-          published: true,
-          likeCount: true,
-          createdAt: true,
-          updatedAt: true,
-          user: {
-            select: {
-              nickname: true,
-            }
+  async getSpecificCategoryBoards(page: number, categoryId: number, sort: string) {
+    let whereField: { [key: string]: number | { [key: string]: number } };
+    let orderByField: { [key: string]: 'desc' | 'asc'}
+
+    const getBoardCategoryParent = await this.getBoardCategoryParent(categoryId);
+
+    if (getBoardCategoryParent.length === 0) {
+      whereField = { categoryId }
+    } else {
+      whereField = { boardCategory: { parentCategory: categoryId } }
+    }
+
+    if (sort === "views") {
+      orderByField = { views: 'desc' }
+    } else {
+      orderByField = { createdAt: 'desc' }
+    }
+    
+    const getSpecificCategoryBoards = await this.prisma.board.findMany({
+      skip: (page - 1) * 10,
+      take: 10,
+      where: whereField,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        views: true,
+        likeCount: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            nickname: true,
           }
         },
-        orderBy: { createdAt: 'asc' },
-      }),
-      this.prisma.board.count({
-        where: {
-          categoryId,
+        boardCategory: {
+          select: {
+            name: true,
+          }
         }
-      }),
-      this.prisma.boardCategory.findUnique({
-        where: {
-          id: categoryId,
-        },
-        select: {
-          name: true,
-        }
-      })
-    ])
+      },
+      orderBy: orderByField,
+    })
 
-    return { category: CategoryBoards[2]?.name, allBoards: CategoryBoards[0], boardTotalCount: CategoryBoards[1], boardTotalPage: Math.ceil(CategoryBoards[1] / perPage) }
+    const getCategoryName = await this.prisma.boardCategory.findUnique({
+      where: {
+        id: categoryId,
+      },
+      select: {
+        name: true,
+      }
+    })
+
+    const boardTotalCount = await this.prisma.board.count({
+      where: whereField,
+    })
+
+    return { category: getCategoryName?.name, boards: getSpecificCategoryBoards, boardTotalCount, boardTotalPage: Math.ceil(boardTotalCount / 10) }
   }
 
   async getSpecificBoard(boardId: number): Promise<Partial<BoardDto> | null> {
@@ -102,6 +100,7 @@ export class BoardService {
         title: true,
         content: true,
         published: true,
+        views: true,
         likeCount: true,
         createdAt: true,
         updatedAt: true,
@@ -199,22 +198,28 @@ export class BoardService {
     ])
   }
 
-  async getSpecificCategoryPopularBoardsSinceAWeekAgo(categoryId: number): Promise<Partial<BoardDto>[]> {
+  async getSpecificCategoryPopularBoardsSinceAWeekAgo(categoryId: number): Promise<AllBoardsDto> {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7).toString().slice(0, 10);
-      
-    return await this.prisma.board.findMany({
-      where: {
-        categoryId,
-        createdAt: {
-          gte: oneWeekAgo,
-        },
-      },
+    
+    let whereField: { [key: string]: number | { [key: string]: number | Date } };
+
+    const getBoardCategoryParent = await this.getBoardCategoryParent(categoryId);
+
+    if (getBoardCategoryParent.length === 0) {
+      whereField = { categoryId, createdAt: { gte: oneWeekAgo } }
+    } else {
+      whereField = { boardCategory: { parentCategory: categoryId }, createdAt: { gte: oneWeekAgo } }
+    }
+
+    const getSpecificCategoryPopularBoardsSinceAWeekAgo = await this.prisma.board.findMany({
+      where: whereField,
       select: {
         id: true,
         title: true,
         content: true,
         published: true,
+        views: true,
         likeCount: true,
         createdAt: true,
         updatedAt: true,
@@ -231,13 +236,28 @@ export class BoardService {
       },
       orderBy: [
         {
-          likeCount: 'desc',
+          views: 'desc',
         },
         {
           createdAt: 'desc',
         },
       ],
       take: 3
+    })
+
+    return { boards: getSpecificCategoryPopularBoardsSinceAWeekAgo }
+  }
+
+  async increseBoardviews(boardId: number) {
+    return await this.prisma.board.update({
+      where: {
+        id: boardId,
+      },
+      data: {
+        views: {
+          increment: 1
+        }
+      }
     })
   }
 }

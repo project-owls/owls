@@ -80,7 +80,7 @@ export class AuthController {
       userId: user.userId
     });
 
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', { httpOnly: true });
     res.cookie('accessToken', newAccessToken, { httpOnly: true });
 
     return res.json({ message: '성공적으로 access Token이 재발급되었습니다.' })
@@ -96,8 +96,8 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   async logOut(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    res.clearCookie('accessToken', { httpOnly: true });
+    res.clearCookie('refreshToken', { httpOnly: true });
 
     return res.redirect('/')
   }

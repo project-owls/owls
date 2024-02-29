@@ -5,5 +5,9 @@
   "endOfLine": "lf",
   "embeddedLanguageFormatting": "auto",
   "bracketSpacing": true,
-  "singleQuote": true
+  "singleQuote": true,
+  "useTabs": false,
+  "trailingComma": "all",
+  "printWidth": 80,
+  "arrowParens": "always"
 }

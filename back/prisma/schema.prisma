@@ -15,12 +15,23 @@ model user {
   id                String            @default(uuid())                    @id
   email             String            @unique()
   nickname          String            @unique()
+  profileImage      userProfileImage?  
   createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   board             board[]
   boardLike         boardLike[]
 }
+
+model userProfileImage {
+  id                Int               @id @default(autoincrement())
+  url               String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  userId            String?           @unique
+  user              user?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 
 model board {
   id                Int               @default(autoincrement())          @id
@@ -37,10 +48,20 @@ model board {
   boardCategory     boardCategory     @relation(fields: [categoryId], references: [id])
 
   boardLike         boardLike[]
+  FileUpload        boardFileUpload[]
 
   @@fulltext([title])
   @@fulltext([content])
   @@fulltext([content, title])
+}
+
+model boardFileUpload {
+  id                Int               @id @default(autoincrement())
+  url               String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  boardId           Int?
+  board             board?            @relation(fields: [boardId], references: [id], onDelete: Cascade)
 }
 
 model boardLike {

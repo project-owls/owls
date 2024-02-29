@@ -4,7 +4,8 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { BoardDto } from 'src/common/dto/board.dto';
 import { AllBoardsDto } from './dto/all-boards.dto';
-import { board, boardLike } from '@prisma/client';
+import { boardLike } from '@prisma/client';
+import fs from 'fs';
 
 @Injectable()
 export class BoardService {
@@ -12,10 +13,17 @@ export class BoardService {
     private prisma: PrismaService,
   ) {}
   
-  async createBoard(createBoardDto: CreateBoardDto): Promise<BoardDto> {
-    return await this.prisma.board.create({
+  async createBoard(createBoardDto: CreateBoardDto, files: Express.Multer.File[]): Promise<Partial<BoardDto> | null> {
+
+    const createBoard = await this.prisma.board.create({
       data: createBoardDto,
     })
+
+    if (files.length !== 0) {
+      await this.createBoardUploadsFile(createBoard.id, files)
+    }
+
+    return await this.getSpecificBoard(createBoard.id)
   }
 
   async getBoardCategoryParent(categoryId: number) {
@@ -69,6 +77,11 @@ export class BoardService {
           select: {
             name: true,
           }
+        },
+        FileUpload: {
+          select: {
+            url: true,
+          }
         }
       },
       orderBy: orderByField,
@@ -113,6 +126,11 @@ export class BoardService {
           select: {
             nickname: true,
           }
+        },
+        FileUpload: {
+          select: {
+            url: true,
+          }
         }
       }
     })
@@ -126,12 +144,40 @@ export class BoardService {
     })
   }
 
-  async updateBoard(boardId: number, updateBoardDto: UpdateBoardDto): Promise<BoardDto> {
-    return this.prisma.board.update({
+  async updateBoard(boardId: number, updateBoardDto: UpdateBoardDto, files: Express.Multer.File[]): Promise<Partial<BoardDto> | null> {
+    await this.deleteBoardUploadsFile(boardId)
+    await this.createBoardUploadsFile(boardId, files)
+
+    return await this.prisma.board.update({
       where: {
         id: boardId,
       },
       data: updateBoardDto,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        views: true,
+        likeCount: true,
+        createdAt: true,
+        updatedAt: true,
+        boardCategory: {
+          select: {
+            name: true,
+          }
+        },
+        user: {
+          select: {
+            nickname: true,
+          }
+        },
+        FileUpload: {
+          select: {
+            url: true,
+          }
+        }
+      }
     })
   }
 
@@ -232,6 +278,11 @@ export class BoardService {
           select: {
             nickname: true,
           }
+        },
+        FileUpload: {
+          select: {
+            url: true,
+          }
         }
       },
       orderBy: [
@@ -310,9 +361,14 @@ export class BoardService {
           select: {
             nickname: true,
           }
+        },
+        FileUpload: {
+          select: {
+            url: true,
+          }
         }
       },
-      //orderBy: orderByField
+      orderBy: orderByField
     })
 
     const getCategoryName = await this.prisma.boardCategory.findUnique({
@@ -329,6 +385,38 @@ export class BoardService {
     })
 
     return { category: getCategoryName?.name, boards: searchBoards, boardTotalCount, boardTotalPage: Math.ceil(boardTotalCount / 10) }
+  }
+
+  async createBoardUploadsFile (boardId: number, files: Express.Multer.File[]): Promise<void> {
+    for (let i = 0; i < files.length; i++) {
+      await this.prisma.boardFileUpload.create({
+        data: {
+          boardId,
+          url: files[i].path
+        }
+      })
+    }
+  }
+
+  async deleteBoardUploadsFile (boardId: number): Promise<void> {
+    const findBoardUploadsFile = await this.prisma.boardFileUpload.findMany({
+      where: {
+        boardId,
+      }
+    })
+
+    for (let i = 0; i < findBoardUploadsFile.length; i++) {
+
+      if (fs.existsSync(findBoardUploadsFile[i].url)) {
+        fs.unlinkSync(findBoardUploadsFile[i].url)
+      }
+    }
+
+    await this.prisma.boardFileUpload.deleteMany({
+      where: {
+        boardId
+      }
+    })
   }
 }
 

@@ -26,6 +26,8 @@ export class AuthService {
       user = await this.userService.create(
         socialLoginDto,
       );
+
+      await this.userService.createUserProfileImage(user.id, "uploads\\default.png")
     }
 
     const accessToken = this.generateAccessToken({ userId: user.id });

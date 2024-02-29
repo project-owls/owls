@@ -27,7 +27,6 @@ export class AuthController {
     @User() socialLoginDto: SocialLoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-
     const { accessToken, refreshToken } = await this.authService.OAuthLogin({
       socialLoginDto,
     });

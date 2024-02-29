@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Query, ParseIntPipe, Body, Post, UseGuards, Param, Put, UnauthorizedException, Delete, NotFoundException, UseInterceptors, DefaultValuePipe } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Query, ParseIntPipe, Body, Post, UseGuards, Param, Put, UnauthorizedException, Delete, NotFoundException, UseInterceptors, DefaultValuePipe, UploadedFiles } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseMsg } from 'src/common/decorators/response-message.decorator';
@@ -7,7 +7,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/common/decorators/user.decorator';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { ResponseTransformInterceptor } from 'src/common/interceptors/response-transform.interceptor';
-import { BoardDto } from 'src/common/dto/board.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import multer from 'multer';
+import path from 'path';
 
 @Controller('boards')
 @ApiTags('BOARD')
@@ -25,20 +27,29 @@ export class BoardController {
   })
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
+  @UseInterceptors(FilesInterceptor('file', 5, {
+    storage: multer.diskStorage({
+      destination: 'uploads/',
+      filename(req, file, cb) {
+        const ext = path.extname(file.originalname);
+        cb(null, path.basename(file.originalname, ext) + Date.now() + ext)
+      }
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('게시글을 성공적으로 작성하였습니다.')
   @Post()
   async createBoard(
     @Body() createBoardDto: CreateBoardDto,
     @User() user,
+    @UploadedFiles() files: Express.Multer.File[]
     ) {
     const {userId} = user;
-
+    
     createBoardDto.userId = userId
     
-    const createdBoard = await this.boardService.createBoard(createBoardDto);
-
-    delete createdBoard.userId
+    const createdBoard = await this.boardService.createBoard(createBoardDto, files || []);
 
     return {
       data: createdBoard,
@@ -107,6 +118,16 @@ export class BoardController {
   })
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
+  @UseInterceptors(FilesInterceptor('file', 5, {
+    storage: multer.diskStorage({
+      destination: 'uploads/',
+      filename(req, file, cb) {
+        const ext = path.extname(file.originalname);
+        cb(null, path.basename(file.originalname, ext) + Date.now() + ext)
+      }
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+  }))
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('게시글을 성공적으로 업데이트하였습니다.')
   @Put(':board_id')
@@ -114,6 +135,7 @@ export class BoardController {
     @Param('board_id', ParseIntPipe) boardId: number,
     @Body() updateBoardDto: UpdateBoardDto,
     @User() user,
+    @UploadedFiles() files: Express.Multer.File[]
   ) {
     const {userId} = user;
     const getBoardData = await this.boardService.getBoardCreateUserId(boardId);
@@ -122,7 +144,7 @@ export class BoardController {
       throw new UnauthorizedException('해당 게시글 작성자가 아니므로 수정이 불가합니다.')
     }
 
-    const updateBoard = await this.boardService.updateBoard(boardId, updateBoardDto);
+    const updateBoard = await this.boardService.updateBoard(boardId, updateBoardDto, files || []);
     return {
       data: updateBoard,
     }

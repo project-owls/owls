@@ -37,7 +37,7 @@ export class BoardService {
     })
   }
 
-  async getSpecificCategoryBoards(page: number, categoryId: number, sort: string) {
+  async getSpecificCategoryBoards(page: number, categoryId: number, sort: string): Promise<Partial<AllBoardsDto> | null> {
     let whereField;
     let orderByField;
 
@@ -189,7 +189,7 @@ export class BoardService {
     })
   }
 
-  async searchLike(boardId: number, userId: string): Promise<boardLike | null> {
+  async searchBoardLike(boardId: number, userId: string): Promise<boardLike | null> {
     return await this.prisma.boardLike.findUnique({
       where: {
         userId_boardId: {
@@ -200,7 +200,7 @@ export class BoardService {
     })
   }
 
-  async createLike(boardId: number, userId: string): Promise<void> {
+  async createBoardLike(boardId: number, userId: string): Promise<void> {
     await this.prisma.$transaction([
       this.prisma.boardLike.create({
         data: {
@@ -221,7 +221,7 @@ export class BoardService {
     ])
   }
 
-  async deleteLike(boardId: number, userId: string): Promise<void> {
+  async deleteBoardLike(boardId: number, userId: string): Promise<void> {
     await this.prisma.$transaction([
       this.prisma.boardLike.delete({
         where: {
@@ -312,7 +312,7 @@ export class BoardService {
     })
   }
 
-  async searchBoards(categoryId: number, search: string, page: number, sort: string): Promise<AllBoardsDto> {
+  async searchBoards(categoryId: number, search: string, page: number, sort: string): Promise<AllBoardsDto | null> {
       const searchList = search.split(' ');
     
       const modifiedSearch = searchList.map((search) => {

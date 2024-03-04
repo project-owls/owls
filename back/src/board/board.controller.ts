@@ -10,6 +10,8 @@ import { ResponseTransformInterceptor } from 'src/common/interceptors/response-t
 import { FilesInterceptor } from '@nestjs/platform-express';
 import multer from 'multer';
 import path from 'path';
+import { AllBoardsDto } from './dto/all-boards.dto';
+import { BoardDto } from 'src/common/dto/board.dto';
 
 @Controller('boards')
 @ApiTags('BOARD')
@@ -63,6 +65,7 @@ export class BoardController {
   })
   @ApiOkResponse({
     description: '해당 카테고리의 모든 게시글을 성공적으로 조회하였습니다.',
+    type: AllBoardsDto
   })
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('해당 카테고리의 모든 게시글을 성공적으로 조회하였습니다.')
@@ -89,6 +92,7 @@ export class BoardController {
   })
   @ApiOkResponse({
     description: '해당 게시글을 성공적으로 조회하였습니다.',
+    type: BoardDto
   })
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('해당 게시글을 성공적으로 조회하였습니다.')
@@ -115,6 +119,7 @@ export class BoardController {
   })
   @ApiOkResponse({
     description: '게시글을 성공적으로 업데이트하였습니다.',
+    type: BoardDto
   })
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
@@ -138,9 +143,13 @@ export class BoardController {
     @UploadedFiles() files: Express.Multer.File[]
   ) {
     const {userId} = user;
-    const getBoardData = await this.boardService.getBoardCreateUserId(boardId);
+    const getBoard = await this.boardService.getBoardCreateUserId(boardId);
 
-    if (getBoardData.userId !== userId) {
+    if (!getBoard) {
+      throw new NotFoundException('해당 게시글은 존재하지 않습니다.')
+    }
+
+    if (getBoard.userId !== userId) {
       throw new UnauthorizedException('해당 게시글 작성자가 아니므로 수정이 불가합니다.')
     }
 
@@ -167,9 +176,13 @@ export class BoardController {
     @User() user,
   ) {
     const {userId} = user;
-    const getBoardData = await this.boardService.getBoardCreateUserId(boardId);
+    const getBoard = await this.boardService.getBoardCreateUserId(boardId);
 
-    if (getBoardData.userId !== userId) {
+    if (!getBoard) {
+      throw new NotFoundException('해당 게시글은 존재하지 않습니다.')
+    }
+
+    if (getBoard.userId !== userId) {
       throw new UnauthorizedException('해당 게시글 작성자가 아니므로 삭제가 불가합니다.')
     }
 
@@ -190,18 +203,25 @@ export class BoardController {
   @UseGuards(AuthGuard('accessToken'))
   @HttpCode(HttpStatus.OK)
   @Post('like/:board_id')
-  async likeSwith(
+  async boardLikeSwith(
     @Param('board_id', ParseIntPipe) boardId: number,
     @User() user,
   ) {
     const {userId} = user;
-    const searchLike = await this.boardService.searchLike(boardId, userId);
 
-    if (searchLike) {
-      await this.boardService.deleteLike(boardId, userId);
+    const getSpecificBoard = await this.boardService.getSpecificBoard(boardId);
+
+    if (!getSpecificBoard) {
+      throw new NotFoundException('해당 게시글은 존재하지 않습니다.')
+    }
+
+    const searchBoardLike = await this.boardService.searchBoardLike(boardId, userId);
+
+    if (searchBoardLike) {
+      await this.boardService.deleteBoardLike(boardId, userId);
       return { message: '해당 게시글의 좋아요를 취소했어요.' }
     } else {
-      await this.boardService.createLike(boardId, userId);
+      await this.boardService.createBoardLike(boardId, userId);
       return { message: '해당 게시글에 좋아요를 눌렀어요!' }
     }
   }
@@ -212,6 +232,7 @@ export class BoardController {
   })
   @ApiOkResponse({
     description: '해당 카테고리 인기글을 성공적으로 조회하였습니다.',
+    type: AllBoardsDto
   })
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('해당 카테고리 인기글을 성공적으로 조회하였습니다.')
@@ -230,6 +251,7 @@ export class BoardController {
   })
   @ApiOkResponse({
     description: '게시글을 성공적으로 검색하였습니다.',
+    type: AllBoardsDto
   })
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('게시글을 성공적으로 검색하였습니다.')
@@ -240,6 +262,10 @@ export class BoardController {
     @Query('sort') sort: string,
     @Query('search') search: string,
   ) {
+    if (!search) {
+      return this.getSpecificCategoryBoard(categoryId, page, sort)
+    }
+
     const searchBoards = await this.boardService.searchBoards(categoryId, search, page, sort);
 
     if (searchBoards.boardTotalCount === 0) {

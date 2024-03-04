@@ -45,8 +45,14 @@ export class CommentService {
                 nickname: true,
               }
             },
+          },
+          orderBy: {
+            createdAt: 'asc'
           }
         }
+      },
+      orderBy: {
+        createdAt: 'asc'
       }
     })
 

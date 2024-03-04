@@ -21,6 +21,8 @@ model user {
 
   board             board[]
   boardLike         boardLike[]
+  comment           comment[]
+  commentLike       commentLike[]
 }
 
 model userProfileImage {
@@ -49,6 +51,7 @@ model board {
 
   boardLike         boardLike[]
   FileUpload        boardFileUpload[]
+  comment           comment[]
 
   @@fulltext([title])
   @@fulltext([content])
@@ -67,8 +70,8 @@ model boardFileUpload {
 model boardLike {
   userId            String
   boardId           Int
-  user              user              @relation(fields: [userId], references: [id])
-  board             board             @relation(fields: [boardId], references: [id])
+  user              user              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  board             board             @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
   @@id([userId, boardId])
 }
@@ -81,4 +84,29 @@ model boardCategory {
 
   board             board[]
   boardCategory     boardCategory[]   @relation("boardCategory")
+}
+
+model comment {
+  id                Int               @default(autoincrement())          @id
+  content           String        
+  createdAt         DateTime          @default(now())
+  likeCount         Int               @default(0)
+  userId            String
+  user              user              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  boardId           Int
+  board             board             @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  parentComment     Int?
+  reComment         comment?          @relation("comment", fields: [parentComment], references: [id], onDelete: Cascade)
+
+  comment           comment[]         @relation("comment")
+  commentLike       commentLike[]
+}
+
+model commentLike {
+  userId            String
+  commentId         Int
+  user              user              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment           comment           @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
 }

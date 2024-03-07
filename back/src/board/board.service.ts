@@ -71,7 +71,11 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
-            profileImage: true,
+            profileImage: {
+              select: {
+                url: true
+              }
+            },
           }
         },
         boardCategory: {
@@ -126,7 +130,11 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
-            profileImage: true,
+            profileImage: {
+              select: {
+                url: true
+              }
+            },
           }
         },
         FileUpload: {
@@ -172,7 +180,11 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
-            profileImage: true,
+            profileImage: {
+              select: {
+                url: true
+              }
+            },
           }
         },
         FileUpload: {
@@ -280,7 +292,11 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
-            profileImage: true,
+            profileImage: {
+              select: {
+                url: true
+              }
+            },
           }
         },
         FileUpload: {
@@ -364,7 +380,11 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
-            profileImage: true,
+            profileImage: {
+              select: {
+                url: true
+              }
+            },
           }
         },
         FileUpload: {

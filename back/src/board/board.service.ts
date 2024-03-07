@@ -71,6 +71,7 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
+            profileImage: true,
           }
         },
         boardCategory: {
@@ -125,6 +126,7 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
+            profileImage: true,
           }
         },
         FileUpload: {
@@ -170,6 +172,7 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
+            profileImage: true,
           }
         },
         FileUpload: {
@@ -277,6 +280,7 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
+            profileImage: true,
           }
         },
         FileUpload: {
@@ -360,6 +364,7 @@ export class BoardService {
         user: {
           select: {
             nickname: true,
+            profileImage: true,
           }
         },
         FileUpload: {

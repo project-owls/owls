@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from '../common/decorators/user.decorator';
 import { AuthGuard } from '@nestjs/passport';
@@ -25,6 +25,21 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async kakaoLogin(
     @User() socialLoginDto: SocialLoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.OAuthLogin({
+      socialLoginDto,
+    });
+
+    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    res.cookie('accessToken', accessToken, { httpOnly: true });
+
+    return res.redirect('/')
+  }
+
+  @Post('test')
+  async test(
+    @Body() socialLoginDto: SocialLoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken, refreshToken } = await this.authService.OAuthLogin({

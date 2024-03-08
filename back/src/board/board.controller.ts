@@ -25,7 +25,8 @@ export class BoardController {
   })
   @ApiOkResponse({
     description: '게시글을 성공적으로 작성하였습니다.',
-    type: CreateBoardDto
+    type: BoardDto
+
   })
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
@@ -61,11 +62,11 @@ export class BoardController {
 
   @ApiOperation({ 
     summary: '카테고리 게시글 조회',
-    description: '해당 카테고리의 모든 게시글을 조회합니다.'
+    description: '해당 카테고리의 모든 게시글을 조회합니다.',
   })
   @ApiOkResponse({
     description: '해당 카테고리의 모든 게시글을 성공적으로 조회하였습니다.',
-    type: AllBoardsDto
+    type: AllBoardsDto,
   })
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('해당 카테고리의 모든 게시글을 성공적으로 조회하였습니다.')

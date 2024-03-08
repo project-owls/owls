@@ -34,13 +34,13 @@ export class CreateBoardDto {
   published: boolean;
 
   @ApiProperty({
-    example: '592024-02-19 13:56:13.248',
+    example: '2024-02-19T13:56:13.248Z',
     description: '생성일',
   })
   createAt: Date;
 
   @ApiProperty({
-    example: '592024-02-19 13:56:13.248',
+    example: '2024-02-19T13:56:13.248Z',
     description: '수정일',
   })
   updateAt: Date;

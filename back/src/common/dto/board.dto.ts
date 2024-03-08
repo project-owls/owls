@@ -65,12 +65,35 @@ export class BoardDto {
   
   categoryId: number;
   
+  @ApiProperty({
+    example: {
+      name: "개발-전체"
+    },
+    description: '게시판 카테고리',
+  })
   boardCategory?: {
     id?: number;
     name?: string;
   };
+
+  @ApiProperty({
+    example: {
+      nickname: "하마"
+    },
+    description: '유저 닉네임',
+  })
   user?: {
     id?: string;
     nickname?: string;
   };
+
+  @ApiProperty({
+    example: [{
+      url: "/uploads/432587dsf.png"
+    }],
+    description: '파일',
+  })
+  fileUpload?: {
+    url: string;
+  }
 }

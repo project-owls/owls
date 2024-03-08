@@ -69,6 +69,7 @@ export class UserController {
   @ApiNotFoundResponse({
     description: '해당 유저가 존재하지 않습니다.'
   })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('유저 정보가 성공적으로 변경되었습니다.')
@@ -104,6 +105,7 @@ export class UserController {
   @ApiNotFoundResponse({
     description: '해당 유저가 존재하지 않습니다.'
   })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
   @HttpCode(HttpStatus.OK)
   @ResponseMsg('회원탈퇴가 성공적으로 완료되었습니다.')
@@ -131,6 +133,7 @@ export class UserController {
   @ApiOkResponse({
     description: '프로필이미지가 성공적으로 업데이트되었습니다.'
   })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
   @UseInterceptors(FileInterceptor('image', {
     storage: multer.diskStorage({

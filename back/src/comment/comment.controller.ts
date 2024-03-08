@@ -73,7 +73,18 @@ export class CommentController {
     }
   }
 
+  @ApiOperation({ 
+    summary: '댓글 업데이트',
+    description: 'param(comment_id)의 댓글을 업데이트합니다.'
+  })
+  @ApiOkResponse({
+    description: '댓글을 성공적으로 업데이트하였습니다.',
+    type: UpdateCommentDto
+  })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
+  @HttpCode(HttpStatus.OK)
+  @ResponseMsg('댓글을 성공적으로 업데이트하였습니다.')
   @Put(':comment_id')
   async updateComment(
     @Param('comment_id', ParseIntPipe) commentId: number,
@@ -100,7 +111,17 @@ export class CommentController {
     }
   }
 
+  @ApiOperation({ 
+    summary: '댓글 삭제',
+    description: 'param(comment_id)의 댓글을 삭제합니다.'
+  })
+  @ApiOkResponse({
+    description: '댓글을 성공적으로 삭제하였습니다.',
+  })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
+  @HttpCode(HttpStatus.OK)
+  @ResponseMsg('댓글을 성공적으로 삭제하였습니다.')
   @Delete(':comment_id')
   async deleteComment(
     @Param('comment_id', ParseIntPipe) commentId: number,
@@ -123,6 +144,15 @@ export class CommentController {
     return {}
   }
 
+  @ApiOperation({ 
+    summary: '댓글 좋아요',
+    description: 'param(comment_id)의 댓글 좋아요 추가/삭제합니다.'
+  })
+  @ApiOkResponse({
+    description: `추가: 해당 댓글에 좋아요를 눌렀어요!,
+    취소: 해당 댓글의 좋아요를 취소했어요.`,
+  })
+  @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
   @Post('like/:comment_id')
   async commnetLikeSwitch(

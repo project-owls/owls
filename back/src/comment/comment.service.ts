@@ -43,6 +43,11 @@ export class CommentService {
             user: {
               select: {
                 nickname: true,
+                profileImage: {
+                  select: {
+                    url: true,
+                  }
+                }
               }
             },
           },

@@ -14,6 +14,9 @@ export class CommentDto {
     likeCount: number,
     user: {
       nickname: string,
+      profileImage: {
+        url: string,
+      },
     }
   };
 }

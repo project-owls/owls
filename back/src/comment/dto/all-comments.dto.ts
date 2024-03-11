@@ -17,7 +17,10 @@ export class AllCommentsDto {
         "likeCount": 3,
         "createdAt": "2024-03-03T15:51:34.1458Z",
         "user": {
-          "nickname": "코끼리"
+          "nickname": "코끼리",
+          "profileImage": {
+            "url":  "uploads\\default.png",
+          },
         },
       },
     },  {"id": 2,}],

@@ -23,6 +23,8 @@ model user {
   boardLike         boardLike[]
   comment           comment[]
   commentLike       commentLike[]
+  roomMember        roomMember[]
+  roomChat          roomChat[]
 }
 
 model userProfileImage {
@@ -109,4 +111,31 @@ model commentLike {
   comment           comment           @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@id([userId, commentId])
+}
+
+model room {
+  id                Int               @default(autoincrement())          @id
+  name              String
+
+  roomMember        roomMember[]
+  roomChat          roomChat[]
+}
+
+model roomMember {
+  userId            String
+  roomId            Int
+  user              user              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room              room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roomId])
+}
+
+model roomChat {
+  id                Int               @default(autoincrement())          @id
+  userId            String
+  roomId            Int
+  content           String
+  createdAt         DateTime          @default(now())
+  user              user              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room              room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
 }

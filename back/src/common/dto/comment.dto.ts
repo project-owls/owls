@@ -8,7 +8,7 @@ export class CommentDto {
   user?: {
     nickname: string,
   };
-  reComment?: {
+  reComment?: [{
     content: string,
     createdAt: Date,
     likeCount: number,
@@ -18,5 +18,5 @@ export class CommentDto {
         url: string,
       },
     }
-  };
+  }];
 }

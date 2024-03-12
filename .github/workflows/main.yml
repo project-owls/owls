@@ -1,0 +1,51 @@
+name: OWLS CICD
+
+env:
+  REGISTRY: ghcr.io
+  DOCKER_IMAGE: ${{ github.repository }}
+  DCOKER_CONTAINER: owls
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v3
+    - name: Set up docker build
+      id: buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to ghcr
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.owls }}
+    - name: Build and Push
+      id: docker_build
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE }}:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+    - name: Login to ghcr
+      uses: docker/login-action@v2 
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.TEST_TOKEN }}
+    - name: Run docker
+      run: |
+          docker stop ${{ env.DOCKER_CONTAINER }} && docker rm ${{ env.DOCKER_CONTAINER }} && docker rmi ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE }}:latest 
+          docker run -d -p 80:3000 --name ${{ env.DOCKER_CONTAINER }} --restart always ${{ env.REGISTRY }}/${{ env.DOCKER_IMAGE }}:latest

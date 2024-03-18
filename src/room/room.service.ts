@@ -13,82 +13,6 @@ export class RoomService {
     return await this.prisma.room.findMany({})
   }
 
-  async getRoomMembers(roomId: number) {
-    return await this.prisma.room.findUnique({
-      where: {
-        id: roomId
-      },
-      include: {
-        roomMember: {
-          select: {
-            user: {
-              select: {
-                nickname: true,
-              }
-            }
-          }
-        },
-      },
-    })
-  }
-
-  // async enterRoom(roomId: number, userId: string) {
-  //   const enterRoom = await this.prisma.roomMember.create({
-  //     data: {
-  //       roomId,
-  //       userId,
-  //     },
-  //     select: {
-  //       user: {
-  //         select: {
-  //           nickname: true,
-  //           profileImage: true,
-  //         }
-  //       },
-  //       room: true,
-  //     }
-  //   })
-
-  //   this.eventGateway.server.to(`${enterRoom.room.name}`).emit('join', `${enterRoom.user.nickname}님이 입장하셨습니다.`)
-
-  //   return enterRoom
-  // }
-
-  // async exitRoom(roomId: number, userId: string) {
-  //   const exitRoom = await this.prisma.roomMember.delete({
-  //     where: {
-  //       userId_roomId: {
-  //         userId,
-  //         roomId,
-  //       }
-  //     },
-  //     select: {
-  //       user: {
-  //         select: {
-  //           nickname: true,
-  //           profileImage: true,
-  //         }
-  //       },
-  //       room: true,
-  //     }
-  //   })
-
-  //   this.eventGateway.server.to(`${exitRoom.room.name}`).emit('exit', `${exitRoom.user.nickname}님이 퇴장하셨습니다.`)
-
-  //   return exitRoom
-  // }
-
-  async getNowEnteringRooms(roomId:number, userId: string) {
-    return await this.prisma.roomMember.findUnique({
-      where: {
-        userId_roomId: {
-          roomId,
-          userId,
-        }
-      }
-    })
-  }
-
   async createRoomChat(roomId: number, userId: string, content: string) {
     const createRoomChat = await this.prisma.roomChat.create({
       data: {
@@ -100,6 +24,7 @@ export class RoomService {
         roomId: true,
         user: {
           select: {
+            id: true,
             nickname: true,
           },
         },
@@ -127,6 +52,7 @@ export class RoomService {
         content: true,
         user: {
           select: {
+            id: true,
             nickname: true,
           }
         },

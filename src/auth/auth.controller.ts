@@ -5,6 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SocialLoginDto } from 'src/user/dto/social-login.dto';
+import { ResponseMsg } from 'src/common/decorators/response-message.decorator';
 
 @Controller('auth')
 @ApiTags('AUTH')
@@ -23,6 +24,7 @@ export class AuthController {
   })
   @UseGuards(AuthGuard('kakao'))
   @HttpCode(HttpStatus.OK)
+  @ResponseMsg('성공적으로 카카오 로그인을 했으며 브라우저 쿠키에 access/refresh Token이 저장되었습니다.')
   async kakaoLogin(
     @User() socialLoginDto: SocialLoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -34,7 +36,9 @@ export class AuthController {
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
     res.cookie('accessToken', accessToken, { httpOnly: true });
 
-    return res.redirect('/')
+    return {
+      data: {}
+    }
   }
 
   @Post('test')
@@ -49,7 +53,9 @@ export class AuthController {
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
     res.cookie('accessToken', accessToken, { httpOnly: true });
 
-    return res.redirect('/')
+    return {
+      data: {}
+    }
   }
 
   @Get('google')
@@ -62,6 +68,7 @@ export class AuthController {
   })
   @UseGuards(AuthGuard('google'))
   @HttpCode(HttpStatus.OK)
+  @ResponseMsg('성공적으로 구글 로그인을 했으며 브라우저 쿠키에 access/refresh Token이 저장되었습니다.')
   async googleLogin(
     @User() socialLoginDto: SocialLoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -74,7 +81,9 @@ export class AuthController {
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
     res.cookie('accessToken', accessToken, { httpOnly: true });
 
-    return res.redirect('/')
+    return {
+      data: {}
+    }
   }
 
 
@@ -89,6 +98,7 @@ export class AuthController {
   })
   @UseGuards(AuthGuard('refreshToken'))
   @HttpCode(HttpStatus.OK)
+  @ResponseMsg('성공적으로 access Token이 재발급되었으며 브라우저 쿠키에 저장되었습니다.')
   async refresh(@User() user, @Res() res: Response) {
     const newAccessToken = this.authService.generateAccessToken({
       userId: user.userId
@@ -97,7 +107,9 @@ export class AuthController {
     res.clearCookie('refreshToken', { httpOnly: true });
     res.cookie('accessToken', newAccessToken, { httpOnly: true });
 
-    return res.json({ message: '성공적으로 access Token이 재발급되었습니다.' })
+    return {
+      data: {}
+    }
   }
 
   @Get('logout')
@@ -109,10 +121,13 @@ export class AuthController {
     description: '성공적으로 로그아웃되었습니다.',
   })
   @HttpCode(HttpStatus.OK)
+  @ResponseMsg('성공적으로 로그아웃되었습니다.')
   async logOut(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('accessToken', { httpOnly: true });
     res.clearCookie('refreshToken', { httpOnly: true });
 
-    return res.redirect('/')
+    return {
+      data: {}
+    }
   }
 }

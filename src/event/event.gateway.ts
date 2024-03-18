@@ -5,17 +5,26 @@ import { Server, Socket } from 'socket.io';
 export class EventGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server: Server;
 
+  clientId: { [key: string]: string } = {};
   roomUsers: { [key: string]: string[] } = {};
 
-  @SubscribeMessage('join')
+  @SubscribeMessage('userLogin')
+  handleLiogin(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: { id: string },
+  ) {
+    this.clientId[data.id] = socket.id
+  }
+
+  @SubscribeMessage('roomJoin')
   handleJoin(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() data: { nickname: string; room: string },   
+    @MessageBody() data: { nickname: string; room: string },
   ): void {
     if (socket.rooms.has(data.room)) {
-      return
+      this.handleExit
     }
-
+    
     socket.join(data.room)
 
     if (!this.roomUsers[data.room]) {
@@ -31,7 +40,7 @@ export class EventGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
     this.server.to(data.room).emit('userCount', { userCount: this.roomUsers[data.room].length})
   }
 
-  @SubscribeMessage('exit')
+  @SubscribeMessage('roomExit')
   handleExit(
     @ConnectedSocket() socket: Socket,
   ): void {
@@ -51,7 +60,7 @@ export class EventGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
     }
   }
 
-  @SubscribeMessage('getUserList')
+  @SubscribeMessage('getRoomUserList')
   handleGetUserList(
     @ConnectedSocket() socket: Socket,
     @MessageBody() room: string,   
@@ -68,7 +77,7 @@ export class EventGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
     
   }
 
-  handleDisconnect(@ConnectedSocket() socket: Socket): any {
+  handleDisconnect(@ConnectedSocket() socket: Socket): void {
     if (socket.data.room) {
       const index = this.roomUsers[socket.data.room]?.indexOf(socket.data.nickname)
       if (index !== -1) {

@@ -70,6 +70,7 @@ export class BoardService {
         updatedAt: true,
         user: {
           select: {
+            id: true,
             nickname: true,
             profileImage: {
               select: {
@@ -129,6 +130,7 @@ export class BoardService {
         },
         user: {
           select: {
+            id: true,
             nickname: true,
             profileImage: {
               select: {
@@ -179,6 +181,7 @@ export class BoardService {
         },
         user: {
           select: {
+            id: true,
             nickname: true,
             profileImage: {
               select: {
@@ -291,6 +294,7 @@ export class BoardService {
         },
         user: {
           select: {
+            id: true,
             nickname: true,
             profileImage: {
               select: {
@@ -379,6 +383,7 @@ export class BoardService {
         },
         user: {
           select: {
+            id: true,
             nickname: true,
             profileImage: {
               select: {

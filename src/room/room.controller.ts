@@ -30,19 +30,6 @@ export class RoomController {
     }
   }
 
-  // @ApiBearerAuth('JWT')
-  // @UseGuards(AuthGuard('accessToken'))
-  // @Get('/members/:room_id')
-  // async getRoomMembers(
-  //   @Param('room_id', ParseIntPipe) roomId: number,
-  // ) {
-  //   const getRoomMembers = await this.roomService.getRoomMembers(roomId)
-
-  //   return {
-  //     data: getRoomMembers
-  //   }
-  // }
-
   @ApiOperation({ 
     summary: '방 채팅 작성',
     description: '방 채팅을 작성합니다.'

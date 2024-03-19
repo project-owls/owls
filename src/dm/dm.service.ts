@@ -139,7 +139,7 @@ export class DmService {
       }
     })
 
-    const receiverSocketId = this.eventGateway.clientId[receiverId]
+    const receiverSocketId = this.eventGateway.getClientId()[receiverId]
 
     this.eventGateway.server.to(receiverSocketId).emit('dm', createDMChat)
 

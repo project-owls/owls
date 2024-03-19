@@ -8,9 +8,21 @@ import { CommentModule } from './comment/comment.module';
 import { EventModule } from './event/event.module';
 import { RoomModule } from './room/room.module';
 import { DmModule } from './dm/dm.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisClientOptions } from 'redis';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
-  imports: [AuthModule, UserModule, BoardModule, CommentModule, EventModule, RoomModule, DmModule],
+  imports: [AuthModule, UserModule, BoardModule, CommentModule, EventModule, RoomModule, DmModule, 
+    CacheModule.register<RedisClientOptions>({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: redisStore,
+        host: 'localhost',
+        prot: 6379
+      }),
+    })
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -3,6 +3,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-kakao";
 
 @Injectable()
+// kakao 로그인 passport 전략
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor() {
     super({

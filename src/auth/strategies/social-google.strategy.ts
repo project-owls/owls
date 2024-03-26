@@ -3,6 +3,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Profile, Strategy } from "passport-google-oauth20";
 
 @Injectable()
+// google 로그인 passport 전략
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor() {
     super({

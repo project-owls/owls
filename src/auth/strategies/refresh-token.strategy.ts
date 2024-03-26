@@ -3,6 +3,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 
 @Injectable()
+// refreshToken 검증
 export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refreshToken') {
   constructor() {
     super({
@@ -11,6 +12,7 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refreshTok
     })
   }
 
+  // 검증 후 return 데이터
   validate(payload) {
     return { userId: payload.userId.userId };
   }

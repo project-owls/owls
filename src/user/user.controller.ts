@@ -11,10 +11,10 @@ import multer, { diskStorage } from 'multer';
 import path from 'path';
 import fs from 'fs';
 
+// uploads 폴더가 있는지 없는지 확인 후 없다면 생성
 try {
   fs.readdirSync('uploads');
 } catch (error) {
-  console.error('uploads 폴더가 없어 uploads 폴더를 생성')
   fs.mkdirSync('uploads')
 }
 
@@ -87,7 +87,7 @@ export class UserController {
       );
     }
 
-    const updatedMyData = await this.userService.update(userId, updateUserDto);
+    const updatedMyData = await this.userService.userUpdate(userId, updateUserDto);
 
     return {
       data: updatedMyData,
@@ -120,7 +120,7 @@ export class UserController {
       );
     }
 
-    await this.userService.delete(userId);
+    await this.userService.userDelete(userId);
 
     return {}
   }

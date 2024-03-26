@@ -10,6 +10,7 @@ export interface Response<T> {
 }
 
 @Injectable()
+// 응답 양식 통일을 위한 interceptor
 export class ResponseTransformInterceptor<T> implements NestInterceptor<T, Response<T>> {
 
   constructor(private reflector: Reflector) {}

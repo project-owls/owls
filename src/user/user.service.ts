@@ -11,12 +11,14 @@ export class UserService {
     private prisma: PrismaService,
   ) {}
 
-  async create(socialLoginDto: SocialLoginDto): Promise<user> {
+  // 회원가입
+  async userCreate(socialLoginDto: SocialLoginDto): Promise<user> {
     return await this.prisma.user.create({
       data: socialLoginDto,
     });
   }
 
+  // id를 통한 유저 정보 조회
   async findById(id: string): Promise<user | null> {
     return this.prisma.user.findUnique({
       where: {
@@ -32,6 +34,7 @@ export class UserService {
     })
   }
 
+  // email을 통한 유저 정보 조회
   async findByEmail(email: string): Promise<user | null> {
     return this.prisma.user.findUnique({
       where: {
@@ -40,6 +43,7 @@ export class UserService {
     })
   }
 
+  // nickname을 통한 유저 정보 조회
   async findByNickname(nickname: string): Promise<user | null> {
     return this.prisma.user.findUnique({
       where: {
@@ -48,7 +52,8 @@ export class UserService {
     })
   }
 
-  async update(id: string, updateUserData: UserDto): Promise<user> {
+  // 유저 정보 업데이트
+  async userUpdate(id: string, updateUserData: UserDto): Promise<user> {
     return this.prisma.user.update({
       where: {
         id,
@@ -57,7 +62,8 @@ export class UserService {
     })
   }
 
-  async delete(id: string): Promise<void> {
+  // 회원탈퇴
+  async userDelete(id: string): Promise<void> {
     await this.prisma.user.delete({
       where: {
         id,
@@ -65,6 +71,7 @@ export class UserService {
     })
   }
 
+  // 유저 프로필이미지 생성
   async createUserProfileImage(userId: string, url: string) {
     return await this.prisma.userProfileImage.create({
       data: {
@@ -74,13 +81,17 @@ export class UserService {
     })
   }
 
+  // 유저 프로필 이미지 업데이트
   async updateUserProfileImage(userId: string, url: string): Promise<userProfileImage> {
+    // 기존 프로필 이미지 확인
     const findUserProfileImageUrl = (await this.findUserProfileImage(userId)).url
     
+    // 기존 프로필 이미지가 서버에 있고 default 이미지가 아니라면 삭제
     if (fs.existsSync(findUserProfileImageUrl) && findUserProfileImageUrl !== "uploads\\default.png") {
       fs.unlinkSync(findUserProfileImageUrl)
     }
 
+    // 신규 프로필 이미지로 업데이트
     const updateUserProfileImage = await this.prisma.userProfileImage.update({
       where: {
         userId,
@@ -93,6 +104,7 @@ export class UserService {
     return updateUserProfileImage
   }
 
+  // 유저 프로필 이미지 조회
   async findUserProfileImage(userId: string): Promise<userProfileImage> {
     return await this.prisma.userProfileImage.findUnique({
       where: {

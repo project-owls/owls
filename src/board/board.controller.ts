@@ -48,7 +48,7 @@ export class BoardController {
     @User() user,
     @UploadedFiles() files: Express.Multer.File[]
     ) {
-    const {userId} = user;
+    const { userId } = user;
     
     createBoardDto.userId = userId
     

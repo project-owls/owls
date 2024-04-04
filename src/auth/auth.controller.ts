@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { User } from '../common/decorators/user.decorator';
 import { AuthGuard } from '@nestjs/passport';
@@ -6,9 +6,11 @@ import { Response } from 'express';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SocialLoginDto } from 'src/user/dto/social-login.dto';
 import { ResponseMsg } from 'src/common/decorators/response-message.decorator';
+import { ResponseTransformInterceptor } from 'src/common/interceptors/response-transform.interceptor';
 
 @Controller('auth')
 @ApiTags('AUTH')
+@UseInterceptors(ResponseTransformInterceptor)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,

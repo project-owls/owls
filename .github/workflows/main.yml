@@ -46,10 +46,10 @@ jobs:
         ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}  
         REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
 
-        REFRESH_TOKEN_SECRET: ${{ secrets.AWS_REGION }}
-        REFRESH_TOKEN_SECRET: ${{ secrets.BUCKET_NAME }}
-        REFRESH_TOKEN_SECRET: ${{ secrets.AWS_ACCESSKEY }}
-        REFRESH_TOKEN_SECRET: ${{ secrets.AWS_SECRETKEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+        AWS_ACCESSKEY: ${{ secrets.AWS_ACCESSKEY }}
+        AWS_SECRETKEY: ${{ secrets.AWS_SECRETKEY }}
 
 
     - name: Set up docker buildx

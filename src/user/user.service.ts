@@ -87,7 +87,7 @@ export class UserService {
     const findUserProfileImageUrl = (await this.findUserProfileImage(userId)).url
     
     // 기존 프로필 이미지가 서버에 있고 default 이미지가 아니라면 삭제
-    if (fs.existsSync(findUserProfileImageUrl) && findUserProfileImageUrl !== "uploads\\default.png") {
+    if (fs.existsSync(findUserProfileImageUrl) && findUserProfileImageUrl !== "uploads/default.png") {
       fs.unlinkSync(findUserProfileImageUrl)
     }
 

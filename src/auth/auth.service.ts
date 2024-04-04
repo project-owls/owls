@@ -31,7 +31,7 @@ export class AuthService {
       );
 
       // 회원가입시 프로필 이미지는 default.png
-      await this.userService.createUserProfileImage(user.id, "uploads\\default.png")
+      await this.userService.createUserProfileImage(user.id, "uploads\default.png")
     }
 
     // access, refresh token 발급

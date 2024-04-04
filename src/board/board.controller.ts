@@ -8,8 +8,6 @@ import { User } from 'src/common/decorators/user.decorator';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { ResponseTransformInterceptor } from 'src/common/interceptors/response-transform.interceptor';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import multer from 'multer';
-import path from 'path';
 import { AllBoardsDto } from './dto/all-boards.dto';
 import { BoardDto } from 'src/common/dto/board.dto';
 
@@ -31,13 +29,6 @@ export class BoardController {
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
   @UseInterceptors(FilesInterceptor('file', 5, {
-    storage: multer.diskStorage({
-      destination: 'uploads/',
-      filename(req, file, cb) {
-        const ext = path.extname(file.originalname);
-        cb(null, path.basename(file.originalname, ext) + Date.now() + ext)
-      }
-    }),
     limits: { fileSize: 5 * 1024 * 1024 },
   }))
   @HttpCode(HttpStatus.OK)
@@ -125,13 +116,6 @@ export class BoardController {
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
   @UseInterceptors(FilesInterceptor('file', 5, {
-    storage: multer.diskStorage({
-      destination: 'uploads/',
-      filename(req, file, cb) {
-        const ext = path.extname(file.originalname);
-        cb(null, path.basename(file.originalname, ext) + Date.now() + ext)
-      }
-    }),
     limits: { fileSize: 5 * 1024 * 1024 },
   }))
   @HttpCode(HttpStatus.OK)

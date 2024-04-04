@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { BoardDto } from 'src/common/dto/board.dto';
 import { AllBoardsDto } from './dto/all-boards.dto';
 import { boardLike } from '@prisma/client';
-import fs from 'fs';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class BoardService {
@@ -449,11 +449,42 @@ export class BoardService {
 
   // 게시글 파일 업로드
   async createBoardUploadsFile (boardId: number, files: Express.Multer.File[]): Promise<void> {
+    // s3 접속관련 설정
+    const awsRegion = process.env.AWS_REGION
+    const bucketName = process.env.BUCKET_NAME
+
+    const client = new S3Client({
+      region: awsRegion,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESSKEY,
+        secretAccessKey: process.env.AWS_SECRETKEY,
+      },
+    })
     for (let i = 0; i < files.length; i++) {
+      // 파일명 중복 방지를 위한 문자열을 파일명 앞에 생성
+      const key = `${Date.now().toString()}-${files[i].originalname}`
+
+      // s3에 이미지 저장을 위한 정보
+      const command = new PutObjectCommand({
+        Key: key,
+        Body: files[i].buffer,
+        Bucket: bucketName,
+      });
+
+      // s3에 파일 업로드
+      const UploadFileS3 = await client.send(command);
+
+      if (UploadFileS3.$metadata.httpStatusCode !== 200) {
+        throw new BadRequestException('파일 업로드에 실패했습니다.')
+      }
+
+      // 저장 후 db 저장을 위한 url
+      const url = `https://owls24.s3.ap-northeast-2.amazonaws.com/${key}`
+      
       await this.prisma.boardFileUpload.create({
         data: {
           boardId,
-          url: files[i].path
+          url,
         }
       })
     }
@@ -464,15 +495,33 @@ export class BoardService {
     const findBoardUploadsFile = await this.prisma.boardFileUpload.findMany({
       where: {
         boardId,
+      },
+      select: {
+        url: true,
       }
     })
 
-    for (let i = 0; i < findBoardUploadsFile.length; i++) {
+    // s3 접속관련 설정
+    const awsRegion = process.env.AWS_REGION
+    const bucketName = process.env.BUCKET_NAME
 
-      if (fs.existsSync(findBoardUploadsFile[i].url)) {
-        fs.unlinkSync(findBoardUploadsFile[i].url)
+    const client = new S3Client({
+      region: awsRegion,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESSKEY,
+        secretAccessKey: process.env.AWS_SECRETKEY,
+      },
+    })
+
+    for (let i = 0; i < findBoardUploadsFile.length; i++) {
+        const deleteProfileImage = new DeleteObjectCommand({
+          Key: findBoardUploadsFile[i].url.substring(47),
+          Bucket: bucketName
+        })
+  
+        await client.send(deleteProfileImage)
       }
-    }
+
 
     await this.prisma.boardFileUpload.deleteMany({
       where: {

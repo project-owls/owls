@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/common/decorators/user.decorator';
@@ -7,16 +7,6 @@ import { ResponseTransformInterceptor } from 'src/common/interceptors/response-t
 import { UserDto } from 'src/common/dto/user.dto';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import multer, { diskStorage } from 'multer';
-import path from 'path';
-import fs from 'fs';
-
-// uploads 폴더가 있는지 없는지 확인 후 없다면 생성
-try {
-  fs.readdirSync('uploads');
-} catch (error) {
-  fs.mkdirSync('uploads')
-}
 
 @Controller('users')
 @ApiTags('USER')
@@ -136,13 +126,6 @@ export class UserController {
   @ApiBearerAuth('JWT')
   @UseGuards(AuthGuard('accessToken'))
   @UseInterceptors(FileInterceptor('image', {
-    storage: multer.diskStorage({
-      destination: 'uploads/',
-      filename(req, file, cb) {
-        const ext = path.extname(file.originalname);
-        cb(null, path.basename(file.originalname, ext) + Date.now() + ext)
-      }
-    }),
     limits: { fileSize: 5 * 1024 * 1024 },
   }))
   @HttpCode(HttpStatus.OK)
@@ -152,13 +135,8 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File
   ) {
     const userId: string = user.userId;
-    let defaultFilePath: string;
 
-    if (!file) {
-      defaultFilePath = "uploads\\default.png"
-    }
-
-    const updateProfileImage = await this.userService.updateUserProfileImage(userId, defaultFilePath || file.path)
+    const updateProfileImage = await this.userService.updateUserProfileImage(userId, file)
     
     const { url } = updateProfileImage
 

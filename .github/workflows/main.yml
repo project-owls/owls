@@ -13,8 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-
-
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -30,6 +28,10 @@ jobs:
         echo "GOOGLE_CALLBACK_URL = $GOOGLE_CALLBACK_URL" >> .env
         echo "ACCESS_TOKEN_SECRET = $ACCESS_TOKEN_SECRET" >> .env
         echo "REFRESH_TOKEN_SECRET = $REFRESH_TOKEN_SECRET" >> .env
+        echo "AWS_REGION = $AWS_REGION" >> .env
+        echo "BUCKET_NAME = $BUCKET_NAME" >> .env
+        echo "AWS_ACCESSKEY = $AWS_ACCESSKEY" >> .env
+        echo "AWS_SECRETKEY = $AWS_SECRETKEY" >> .env
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
